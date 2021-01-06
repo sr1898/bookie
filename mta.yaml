@@ -1,0 +1,54 @@
+ID: bookie
+_schema-version: "2.1"
+parameters:
+  deploy_mode: html5-repo
+version: 0.0.1
+modules:
+  - name: bookie-approuter
+    type: approuter.nodejs
+    path: bookie-approuter
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: bookie_html5_repo_runtime
+  - name: bookie_ui_deployer
+    type: com.sap.html5.application-content
+    path: bookie_ui_deployer
+    requires:
+      - name: bookie_html5_repo_host
+  - name: bookie-db
+    type: hdb
+    path: db
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    requires:
+      - name: bookie-db-hdi-container
+  - name: bookie-srv
+    type: nodejs
+    path: srv
+    parameters:
+      memory: 512M
+      disk-quota: 512M
+    provides:
+      - name: srv_api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: bookie-db-hdi-container
+resources:
+  - name: bookie_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: bookie_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: bookie-db-hdi-container
+    type: com.sap.xs.hdi-container
+    properties:
+      hdi-container-name: ${service-name}
